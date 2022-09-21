@@ -1,0 +1,1009 @@
+From 5661843926241d2a654bf1ab99dbecdf7ab7b002 Mon Sep 17 00:00:00 2001
+From: Alexandre Bouvier <contact@amb.tf>
+Date: Fri, 20 Aug 2021 06:07:12 +0200
+Subject: [PATCH 1/3] cmake: Allow unbundling some external libraries
+
+Add support for linking against the following system libraries:
+
+* cubeb
+* inih
+* xbyak
+* dynarmic
+* httplib
+---
+ CMakeLists.txt                | 63 +++++++++++++++++++++++++++++++++++
+ externals/CMakeLists.txt      | 12 ++++---
+ externals/inih/CMakeLists.txt |  2 +-
+ src/yuzu_cmd/config.cpp       |  2 +-
+ 4 files changed, 72 insertions(+), 7 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0ee012aca8c6..578e7ad88e3b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -28,6 +28,16 @@ option(YUZU_USE_BUNDLED_LIBUSB "Compile bundled libusb" OFF)
+ 
+ option(YUZU_USE_BUNDLED_FFMPEG "Download/Build bundled FFmpeg" "${WIN32}")
+ 
++option(YUZU_USE_BUNDLED_XBYAK "Compile bundled xbyak" ON)
++
++option(YUZU_USE_BUNDLED_INIH "Compile bundled inih" ON)
++
++option(YUZU_USE_BUNDLED_CUBEB "Compile bundled cubeb" ON)
++
++option(YUZU_USE_BUNDLED_DYNARMIC "Compile bundled dynarmic" ON)
++
++option(YUZU_USE_BUNDLED_HTTPLIB "Compile bundled httplib" ON)
++
+ option(YUZU_USE_QT_WEB_ENGINE "Use QtWebEngine for web applet implementation" OFF)
+ 
+ option(ENABLE_CUBEB "Enables the cubeb audio backend" ON)
+@@ -427,6 +437,59 @@ endif()
+ set(THREADS_PREFER_PTHREAD_FLAG ON)
+ find_package(Threads REQUIRED)
+ 
++if ((ARCHITECTURE_x86 OR ARCHITECTURE_x86_64) AND NOT YUZU_USE_BUNDLED_XBYAK)
++    find_package(xbyak)
++    if (xbyak_FOUND)
++        add_library(xbyak ALIAS xbyak::xbyak)
++    else()
++        message(STATUS "xbyak not found, falling back to externals")
++        set(YUZU_USE_BUNDLED_XBYAK ON)
++    endif()
++endif()
++
++if (NOT YUZU_USE_BUNDLED_INIH)
++    find_package(PkgConfig QUIET)
++    if (PKG_CONFIG_FOUND)
++        pkg_check_modules(inih IMPORTED_TARGET INIReader)
++    endif()
++    if (inih_FOUND)
++        add_library(inih ALIAS PkgConfig::inih)
++    else()
++        message(STATUS "inih not found, falling back to externals")
++        set(YUZU_USE_BUNDLED_INIH ON)
++    endif()
++endif()
++
++if (ENABLE_CUBEB AND NOT YUZU_USE_BUNDLED_CUBEB)
++    find_package(cubeb)
++    if (cubeb_FOUND)
++        add_library(cubeb ALIAS cubeb::cubeb)
++    else()
++        message(STATUS "cubeb not found, falling back to externals")
++        set(YUZU_USE_BUNDLED_CUBEB ON)
++    endif()
++endif()
++
++if (ARCHITECTURE_x86_64 AND NOT YUZU_USE_BUNDLED_DYNARMIC)
++    find_package(dynarmic)
++    if (dynarmic_FOUND)
++        add_library(dynarmic ALIAS dynarmic::dynarmic)
++    else()
++        message(STATUS "dynarmic not found, falling back to externals")
++        set(YUZU_USE_BUNDLED_DYNARMIC ON)
++    endif()
++endif()
++
++if (ENABLE_WEB_SERVICE AND NOT YUZU_USE_BUNDLED_HTTPLIB)
++    find_package(httplib)
++    if (httplib_FOUND)
++        add_library(httplib ALIAS httplib::httplib)
++    else()
++        message(STATUS "httplib not found, falling back to externals")
++        set(YUZU_USE_BUNDLED_HTTPLIB ON)
++    endif()
++endif()
++
+ # Platform-specific library requirements
+ # ======================================
+ 
+diff --git a/externals/CMakeLists.txt b/externals/CMakeLists.txt
+index eea70fc27da8..d0b4a3ab5cd3 100644
+--- a/externals/CMakeLists.txt
++++ b/externals/CMakeLists.txt
+@@ -6,7 +6,7 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/externals/find-modules")
+ include(DownloadExternals)
+ 
+ # xbyak
+-if (ARCHITECTURE_x86 OR ARCHITECTURE_x86_64)
++if ((ARCHITECTURE_x86 OR ARCHITECTURE_x86_64) AND NOT TARGET xbyak)
+     add_library(xbyak INTERFACE)
+     file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/xbyak/include)
+     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/xbyak/xbyak DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/xbyak/include)
+@@ -15,7 +15,7 @@ if (ARCHITECTURE_x86 OR ARCHITECTURE_x86_64)
+ endif()
+ 
+ # Dynarmic
+-if (ARCHITECTURE_x86_64)
++if (ARCHITECTURE_x86_64 AND NOT TARGET dynarmic)
+     set(DYNARMIC_TESTS OFF)
+     set(DYNARMIC_NO_BUNDLED_FMT ON)
+     set(DYNARMIC_IGNORE_ASSERTS ON CACHE BOOL "" FORCE)
+@@ -31,7 +31,9 @@ endif()
+ add_subdirectory(glad)
+ 
+ # inih
+-add_subdirectory(inih)
++if (NOT TARGET inih)
++    add_subdirectory(inih)
++endif()
+ 
+ # mbedtls
+ add_subdirectory(mbedtls EXCLUDE_FROM_ALL)
+@@ -79,7 +81,7 @@ add_subdirectory(enet)
+ target_include_directories(enet INTERFACE ./enet/include)
+ 
+ # Cubeb
+-if(ENABLE_CUBEB)
++if (ENABLE_CUBEB AND NOT TARGET cubeb)
+     set(BUILD_TESTS OFF CACHE BOOL "")
+     add_subdirectory(cubeb EXCLUDE_FROM_ALL)
+ endif()
+@@ -93,7 +95,7 @@ endif()
+ # Sirit
+ add_subdirectory(sirit)
+ 
+-if (ENABLE_WEB_SERVICE)
++if (ENABLE_WEB_SERVICE AND NOT TARGET httplib)
+     find_package(OpenSSL 1.1)
+     if (OPENSSL_FOUND)
+         set(OPENSSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
+diff --git a/externals/inih/CMakeLists.txt b/externals/inih/CMakeLists.txt
+index b686e3cf5808..827ac3bbcf31 100644
+--- a/externals/inih/CMakeLists.txt
++++ b/externals/inih/CMakeLists.txt
+@@ -9,4 +9,4 @@ add_library(inih
+ )
+ 
+ create_target_directory_groups(inih)
+-target_include_directories(inih INTERFACE .)
++target_include_directories(inih INTERFACE inih/cpp)
+diff --git a/src/yuzu_cmd/config.cpp b/src/yuzu_cmd/config.cpp
+index bd0fb75f8db6..7e14049ccd61 100644
+--- a/src/yuzu_cmd/config.cpp
++++ b/src/yuzu_cmd/config.cpp
+@@ -15,7 +15,7 @@
+ #pragma clang diagnostic pop
+ #endif
+ 
+-#include <inih/cpp/INIReader.h>
++#include <INIReader.h>
+ #include "common/fs/file.h"
+ #include "common/fs/fs.h"
+ #include "common/fs/path_util.h"
+
+From 0377153108076ff8c422814b02352fa2c80857fc Mon Sep 17 00:00:00 2001
+From: Andrea Pappacoda <andrea@pappacoda.it>
+Date: Fri, 25 Mar 2022 23:22:58 +0100
+Subject: [PATCH 2/3] build: also look for cpp-httplib via pkg-config
+
+---
+ CMakeLists.txt                           |  6 ++----
+ externals/CMakeLists.txt                 |  4 ++--
+ externals/find-modules/Findhttplib.cmake | 22 ++++++++++++++++++++++
+ src/web_service/CMakeLists.txt           |  2 +-
+ 4 files changed, 27 insertions(+), 7 deletions(-)
+ create mode 100644 externals/find-modules/Findhttplib.cmake
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 578e7ad88e3b..2859ee5b85a9 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -481,10 +481,8 @@ if (ARCHITECTURE_x86_64 AND NOT YUZU_USE_BUNDLED_DYNARMIC)
+ endif()
+ 
+ if (ENABLE_WEB_SERVICE AND NOT YUZU_USE_BUNDLED_HTTPLIB)
+-    find_package(httplib)
+-    if (httplib_FOUND)
+-        add_library(httplib ALIAS httplib::httplib)
+-    else()
++    find_package(httplib MODULE)
++    if (NOT httplib_FOUND)
+         message(STATUS "httplib not found, falling back to externals")
+         set(YUZU_USE_BUNDLED_HTTPLIB ON)
+     endif()
+diff --git a/externals/CMakeLists.txt b/externals/CMakeLists.txt
+index d0b4a3ab5cd3..26fdd934e712 100644
+--- a/externals/CMakeLists.txt
++++ b/externals/CMakeLists.txt
+@@ -95,7 +95,7 @@ endif()
+ # Sirit
+ add_subdirectory(sirit)
+ 
+-if (ENABLE_WEB_SERVICE AND NOT TARGET httplib)
++if (ENABLE_WEB_SERVICE AND NOT TARGET httplib::httplib)
+     find_package(OpenSSL 1.1)
+     if (OPENSSL_FOUND)
+         set(OPENSSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
+@@ -119,7 +119,7 @@ if (ENABLE_WEB_SERVICE AND NOT TARGET httplib)
+     if (WIN32)
+         target_link_libraries(httplib INTERFACE crypt32 cryptui ws2_32)
+     endif()
+-	
++
+     # cpp-jwt
+     add_library(cpp-jwt INTERFACE)
+     target_include_directories(cpp-jwt INTERFACE ./cpp-jwt/include)
+diff --git a/externals/find-modules/Findhttplib.cmake b/externals/find-modules/Findhttplib.cmake
+new file mode 100644
+index 000000000000..0c7374c21d15
+--- /dev/null
++++ b/externals/find-modules/Findhttplib.cmake
+@@ -0,0 +1,22 @@
++# SPDX-FileCopyrightText: 2022 Andrea Pappacoda <andrea@pappacoda.it>
++#
++# SPDX-License-Identifier: GPL-2.0-or-later
++
++find_package(httplib CONFIG)
++if (NOT httplib_FOUND)
++    find_package(PkgConfig QUIET)
++    if (PKG_CONFIG_FOUND)
++        pkg_search_module(cpp-httplib IMPORTED_TARGET cpp-httplib)
++        if (cpp-httplib_FOUND)
++            set(httplib_FOUND True)
++            set(HTTPLIB_VERSION "${cpp-httplib_VERSION}")
++            add_library(httplib::httplib ALIAS PkgConfig::cpp-httplib)
++        endif()
++    endif()
++endif()
++
++include(FindPackageHandleStandardArgs)
++find_package_handle_standard_args(httplib
++    REQUIRED_VARS httplib_FOUND
++    VERSION_VAR HTTPLIB_VERSION
++)
+diff --git a/src/web_service/CMakeLists.txt b/src/web_service/CMakeLists.txt
+index 3f75d97d178f..cbd4a814e87a 100644
+--- a/src/web_service/CMakeLists.txt
++++ b/src/web_service/CMakeLists.txt
+@@ -16,4 +16,4 @@ add_library(web_service STATIC
+ )
+ 
+ create_target_directory_groups(web_service)
+-target_link_libraries(web_service PRIVATE common network nlohmann_json::nlohmann_json httplib cpp-jwt)
++target_link_libraries(web_service PRIVATE common network nlohmann_json::nlohmann_json httplib::httplib cpp-jwt)
+
+From f0b97d5b7fae58a471c3720db0598e93010d8023 Mon Sep 17 00:00:00 2001
+From: Alexandre Bouvier <contact@amb.tf>
+Date: Mon, 28 Mar 2022 01:16:58 +0200
+Subject: [PATCH 3/3] cmake: Add option to unbundle every external
+
+---
+ CMakeLists.txt                                | 138 ++++++++----------
+ externals/CMakeLists.txt                      |  40 +++--
+ externals/find-modules/FindDiscordRPC.cmake   |  27 ++++
+ .../find-modules/FindVulkanHeaders.cmake      |  47 ++++++
+ externals/find-modules/Findenet.cmake         |  18 +++
+ externals/find-modules/Findhttplib.cmake      |  27 ++--
+ externals/find-modules/Findinih.cmake         |  18 +++
+ externals/find-modules/Findzstd.cmake         |  38 +++--
+ externals/inih/CMakeLists.txt                 |   1 +
+ src/audio_core/CMakeLists.txt                 |   4 +-
+ src/common/CMakeLists.txt                     |   8 +-
+ src/core/CMakeLists.txt                       |   4 +-
+ src/dedicated_room/CMakeLists.txt             |   2 +-
+ src/network/CMakeLists.txt                    |   2 +-
+ src/video_core/CMakeLists.txt                 |   7 +-
+ src/web_service/CMakeLists.txt                |   2 +-
+ src/yuzu/CMakeLists.txt                       |   6 +-
+ src/yuzu_cmd/CMakeLists.txt                   |   4 +-
+ 18 files changed, 257 insertions(+), 136 deletions(-)
+ create mode 100644 externals/find-modules/FindDiscordRPC.cmake
+ create mode 100644 externals/find-modules/FindVulkanHeaders.cmake
+ create mode 100644 externals/find-modules/Findenet.cmake
+ create mode 100644 externals/find-modules/Findinih.cmake
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2859ee5b85a9..4c07bcf62bb9 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -28,16 +28,6 @@ option(YUZU_USE_BUNDLED_LIBUSB "Compile bundled libusb" OFF)
+ 
+ option(YUZU_USE_BUNDLED_FFMPEG "Download/Build bundled FFmpeg" "${WIN32}")
+ 
+-option(YUZU_USE_BUNDLED_XBYAK "Compile bundled xbyak" ON)
+-
+-option(YUZU_USE_BUNDLED_INIH "Compile bundled inih" ON)
+-
+-option(YUZU_USE_BUNDLED_CUBEB "Compile bundled cubeb" ON)
+-
+-option(YUZU_USE_BUNDLED_DYNARMIC "Compile bundled dynarmic" ON)
+-
+-option(YUZU_USE_BUNDLED_HTTPLIB "Compile bundled httplib" ON)
+-
+ option(YUZU_USE_QT_WEB_ENGINE "Use QtWebEngine for web applet implementation" OFF)
+ 
+ option(ENABLE_CUBEB "Enables the cubeb audio backend" ON)
+@@ -52,6 +42,24 @@ option(YUZU_USE_BUNDLED_VCPKG "Use vcpkg for yuzu dependencies" "${MSVC}")
+ 
+ option(YUZU_CHECK_SUBMODULES "Check if submodules are present" ON)
+ 
++option(YUZU_USE_BUNDLED_CPP_JWT "Compile bundled cpp-jwt" ON)
++
++option(YUZU_USE_BUNDLED_CUBEB "Compile bundled cubeb" ON)
++
++option(YUZU_USE_BUNDLED_DISCORD_PRESENCE "Compile bundled discord-rpc" ON)
++
++option(YUZU_USE_BUNDLED_DYNARMIC "Compile bundled dynarmic" ON)
++
++option(YUZU_USE_BUNDLED_ENET "Compile bundled enet" ON)
++
++option(YUZU_USE_BUNDLED_HTTPLIB "Compile bundled cpp-httplib" ON)
++
++option(YUZU_USE_BUNDLED_INIH "Compile bundled inih" ON)
++
++option(YUZU_USE_BUNDLED_VULKAN_HEADERS "Compile bundled Vulkan-Headers" ON)
++
++option(YUZU_USE_BUNDLED_XBYAK "Compile bundled xbyak" ON)
++
+ if (YUZU_USE_BUNDLED_VCPKG)
+     if (YUZU_TESTS)
+         list(APPEND VCPKG_MANIFEST_FEATURES "yuzu-tests")
+@@ -175,24 +183,55 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+ # System imported libraries
+ # =======================================================================
+ 
+-find_package(fmt 8.0.1 REQUIRED CONFIG)
+-find_package(nlohmann_json 3.8 REQUIRED CONFIG)
++find_package(fmt 8.0.1 REQUIRED)
++find_package(lz4 1.8 REQUIRED)
++find_package(nlohmann_json 3.8 REQUIRED)
+ find_package(ZLIB 1.2 REQUIRED)
++find_package(zstd 1.5 REQUIRED)
++
++if (NOT YUZU_USE_BUNDLED_ENET)
++    find_package(enet 1.3.13 REQUIRED)
++endif()
++
++if (NOT YUZU_USE_BUNDLED_INIH)
++    find_package(inih REQUIRED)
++endif()
++
++if (NOT YUZU_USE_BUNDLED_OPUS)
++    find_package(Opus 1.3 REQUIRED)
++endif()
++
++if (NOT YUZU_USE_BUNDLED_VULKAN_HEADERS)
++    find_package(VulkanHeaders 1.3.213 REQUIRED)
++endif()
++
++if (NOT YUZU_USE_BUNDLED_XBYAK)
++    find_package(xbyak 6 REQUIRED)
++endif()
++
++if (ENABLE_WEB_SERVICE)
++    if (NOT YUZU_USE_BUNDLED_HTTPLIB)
++        find_package(httplib 0.10.8 REQUIRED)
++    endif()
++    if (NOT YUZU_USE_BUNDLED_CPP_JWT)
++        find_package(cpp-jwt 1.4 REQUIRED)
++    endif()
++endif()
++
++if (USE_DISCORD_PRESENCE AND NOT YUZU_USE_BUNDLED_DISCORD_PRESENCE)
++    find_package(DiscordRPC REQUIRED)
++endif()
+ 
+-# Search for config-only package first (for vcpkg), then try non-config
+-find_package(zstd 1.5 CONFIG)
+-if (NOT zstd_FOUND)
+-    find_package(zstd 1.5 REQUIRED)
++if (ENABLE_CUBEB AND NOT YUZU_USE_BUNDLED_CUBEB)
++    find_package(cubeb REQUIRED)
+ endif()
+ 
+-# lz4 1.8 is required, but vcpkg's lz4-config.cmake does not have version info
+-find_package(lz4 CONFIG)
+-if (NOT lz4_FOUND)
+-    find_package(lz4 1.8 REQUIRED)
++if (ARCHITECTURE_x86_64 AND NOT YUZU_USE_BUNDLED_DYNARMIC)
++    find_package(dynarmic 6.2.3 REQUIRED)
+ endif()
+ 
+ if (YUZU_TESTS)
+-    find_package(Catch2 2.13.7 REQUIRED CONFIG)
++    find_package(Catch2 2.13.7 REQUIRED)
+ endif()
+ 
+ find_package(Boost 1.73.0 COMPONENTS context)
+@@ -252,7 +291,7 @@ if(ENABLE_QT)
+             endif()
+ 
+             # Check for headers
+-            Include(FindPkgConfig REQUIRED)
++            find_package(PkgConfig REQUIRED)
+             pkg_check_modules(QT_DEP_GLU QUIET glu>=9.0.0)
+             if (NOT QT_DEP_GLU_FOUND)
+                 message(FATAL_ERROR "Qt bundled pacakge dependency `glu` not found. \
+@@ -386,7 +425,7 @@ endif()
+ 
+ # Ensure libusb is properly configured (based on dolphin libusb include)
+ if(NOT APPLE AND NOT YUZU_USE_BUNDLED_LIBUSB)
+-    include(FindPkgConfig)
++    find_package(PkgConfig)
+     if (PKG_CONFIG_FOUND AND NOT CMAKE_SYSTEM_NAME MATCHES "DragonFly|FreeBSD")
+         pkg_check_modules(LIBUSB QUIET libusb-1.0>=1.0.24)
+     else()
+@@ -410,7 +449,7 @@ set(FFmpeg_COMPONENTS
+     swscale)
+ 
+ if (UNIX AND NOT APPLE)
+-    Include(FindPkgConfig REQUIRED)
++    find_package(PkgConfig REQUIRED)
+     pkg_check_modules(LIBVA libva)
+ endif()
+ if (NOT YUZU_USE_BUNDLED_FFMPEG)
+@@ -437,57 +476,6 @@ endif()
+ set(THREADS_PREFER_PTHREAD_FLAG ON)
+ find_package(Threads REQUIRED)
+ 
+-if ((ARCHITECTURE_x86 OR ARCHITECTURE_x86_64) AND NOT YUZU_USE_BUNDLED_XBYAK)
+-    find_package(xbyak)
+-    if (xbyak_FOUND)
+-        add_library(xbyak ALIAS xbyak::xbyak)
+-    else()
+-        message(STATUS "xbyak not found, falling back to externals")
+-        set(YUZU_USE_BUNDLED_XBYAK ON)
+-    endif()
+-endif()
+-
+-if (NOT YUZU_USE_BUNDLED_INIH)
+-    find_package(PkgConfig QUIET)
+-    if (PKG_CONFIG_FOUND)
+-        pkg_check_modules(inih IMPORTED_TARGET INIReader)
+-    endif()
+-    if (inih_FOUND)
+-        add_library(inih ALIAS PkgConfig::inih)
+-    else()
+-        message(STATUS "inih not found, falling back to externals")
+-        set(YUZU_USE_BUNDLED_INIH ON)
+-    endif()
+-endif()
+-
+-if (ENABLE_CUBEB AND NOT YUZU_USE_BUNDLED_CUBEB)
+-    find_package(cubeb)
+-    if (cubeb_FOUND)
+-        add_library(cubeb ALIAS cubeb::cubeb)
+-    else()
+-        message(STATUS "cubeb not found, falling back to externals")
+-        set(YUZU_USE_BUNDLED_CUBEB ON)
+-    endif()
+-endif()
+-
+-if (ARCHITECTURE_x86_64 AND NOT YUZU_USE_BUNDLED_DYNARMIC)
+-    find_package(dynarmic)
+-    if (dynarmic_FOUND)
+-        add_library(dynarmic ALIAS dynarmic::dynarmic)
+-    else()
+-        message(STATUS "dynarmic not found, falling back to externals")
+-        set(YUZU_USE_BUNDLED_DYNARMIC ON)
+-    endif()
+-endif()
+-
+-if (ENABLE_WEB_SERVICE AND NOT YUZU_USE_BUNDLED_HTTPLIB)
+-    find_package(httplib MODULE)
+-    if (NOT httplib_FOUND)
+-        message(STATUS "httplib not found, falling back to externals")
+-        set(YUZU_USE_BUNDLED_HTTPLIB ON)
+-    endif()
+-endif()
+-
+ # Platform-specific library requirements
+ # ======================================
+ 
+diff --git a/externals/CMakeLists.txt b/externals/CMakeLists.txt
+index 26fdd934e712..18b7fb1dc09c 100644
+--- a/externals/CMakeLists.txt
++++ b/externals/CMakeLists.txt
+@@ -6,20 +6,22 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/externals/find-modules")
+ include(DownloadExternals)
+ 
+ # xbyak
+-if ((ARCHITECTURE_x86 OR ARCHITECTURE_x86_64) AND NOT TARGET xbyak)
++if ((ARCHITECTURE_x86 OR ARCHITECTURE_x86_64) AND NOT TARGET xbyak::xbyak)
+     add_library(xbyak INTERFACE)
+     file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/xbyak/include)
+     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/xbyak/xbyak DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/xbyak/include)
+     target_include_directories(xbyak SYSTEM INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/xbyak/include)
+     target_compile_definitions(xbyak INTERFACE XBYAK_NO_OP_NAMES)
++    add_library(xbyak::xbyak ALIAS xbyak)
+ endif()
+ 
+ # Dynarmic
+-if (ARCHITECTURE_x86_64 AND NOT TARGET dynarmic)
++if (ARCHITECTURE_x86_64 AND NOT TARGET dynarmic::dynarmic)
+     set(DYNARMIC_TESTS OFF)
+     set(DYNARMIC_NO_BUNDLED_FMT ON)
+     set(DYNARMIC_IGNORE_ASSERTS ON CACHE BOOL "" FORCE)
+     add_subdirectory(dynarmic)
++    add_library(dynarmic::dynarmic ALIAS dynarmic)
+ endif()
+ 
+ # getopt
+@@ -31,13 +33,14 @@ endif()
+ add_subdirectory(glad)
+ 
+ # inih
+-if (NOT TARGET inih)
++if (NOT TARGET inih::INIReader)
+     add_subdirectory(inih)
+ endif()
+ 
+ # mbedtls
+ add_subdirectory(mbedtls EXCLUDE_FROM_ALL)
+-target_include_directories(mbedtls PUBLIC ./mbedtls/include)
++target_include_directories(mbedcrypto PUBLIC ./mbedtls/include)
++add_library(MbedTLS::mbedcrypto ALIAS mbedcrypto)
+ 
+ # MicroProfile
+ add_library(microprofile INTERFACE)
+@@ -77,24 +80,30 @@ if (YUZU_USE_EXTERNAL_SDL2)
+ endif()
+ 
+ # ENet
+-add_subdirectory(enet)
+-target_include_directories(enet INTERFACE ./enet/include)
++if (NOT TARGET enet::enet)
++    add_subdirectory(enet)
++    target_include_directories(enet INTERFACE ./enet/include)
++    add_library(enet::enet ALIAS enet)
++endif()
+ 
+ # Cubeb
+-if (ENABLE_CUBEB AND NOT TARGET cubeb)
++if (ENABLE_CUBEB AND NOT TARGET cubeb::cubeb)
+     set(BUILD_TESTS OFF CACHE BOOL "")
+     add_subdirectory(cubeb EXCLUDE_FROM_ALL)
++    add_library(cubeb::cubeb ALIAS cubeb)
+ endif()
+ 
+ # DiscordRPC
+-if (USE_DISCORD_PRESENCE)
++if (USE_DISCORD_PRESENCE AND NOT TARGET DiscordRPC::discord-rpc)
+     add_subdirectory(discord-rpc EXCLUDE_FROM_ALL)
+     target_include_directories(discord-rpc INTERFACE ./discord-rpc/include)
++    add_library(DiscordRPC::discord-rpc ALIAS discord-rpc)
+ endif()
+ 
+ # Sirit
+ add_subdirectory(sirit)
+ 
++# cpp-httplib
+ if (ENABLE_WEB_SERVICE AND NOT TARGET httplib::httplib)
+     find_package(OpenSSL 1.1)
+     if (OPENSSL_FOUND)
+@@ -119,18 +128,20 @@ if (ENABLE_WEB_SERVICE AND NOT TARGET httplib::httplib)
+     if (WIN32)
+         target_link_libraries(httplib INTERFACE crypt32 cryptui ws2_32)
+     endif()
++    add_library(httplib::httplib ALIAS httplib)
++endif()
+ 
+-    # cpp-jwt
++# cpp-jwt
++if (ENABLE_WEB_SERVICE AND NOT TARGET cpp-jwt::cpp-jwt)
+     add_library(cpp-jwt INTERFACE)
+     target_include_directories(cpp-jwt INTERFACE ./cpp-jwt/include)
+     target_compile_definitions(cpp-jwt INTERFACE CPP_JWT_USE_VENDORED_NLOHMANN_JSON)
++    add_library(cpp-jwt::cpp-jwt ALIAS cpp-jwt)
+ endif()
+ 
+ # Opus
+-if (YUZU_USE_BUNDLED_OPUS)
++if (NOT TARGET Opus::opus)
+     add_subdirectory(opus EXCLUDE_FROM_ALL)
+-else()
+-    find_package(Opus 1.3 REQUIRED)
+ endif()
+ 
+ # FFMpeg
+@@ -141,3 +152,8 @@ if (YUZU_USE_BUNDLED_FFMPEG)
+     set(FFmpeg_LIBRARIES "${FFmpeg_LIBRARIES}" PARENT_SCOPE)
+     set(FFmpeg_INCLUDE_DIR "${FFmpeg_INCLUDE_DIR}" PARENT_SCOPE)
+ endif()
++
++# Vulkan-Headers
++if (NOT TARGET Vulkan::Headers)
++    add_subdirectory(Vulkan-Headers)
++endif()
+diff --git a/externals/find-modules/FindDiscordRPC.cmake b/externals/find-modules/FindDiscordRPC.cmake
+new file mode 100644
+index 000000000000..44ca9904f4ae
+--- /dev/null
++++ b/externals/find-modules/FindDiscordRPC.cmake
+@@ -0,0 +1,27 @@
++# SPDX-FileCopyrightText: 2022 Alexandre Bouvier <contact@amb.tf>
++#
++# SPDX-License-Identifier: GPL-3.0-or-later
++
++find_path(DiscordRPC_INCLUDE_DIR discord_rpc.h)
++
++find_library(DiscordRPC_LIBRARY discord-rpc)
++
++include(FindPackageHandleStandardArgs)
++find_package_handle_standard_args(DiscordRPC
++    REQUIRED_VARS
++        DiscordRPC_LIBRARY
++        DiscordRPC_INCLUDE_DIR
++)
++
++if (DiscordRPC_FOUND AND NOT TARGET DiscordRPC::discord-rpc)
++    add_library(DiscordRPC::discord-rpc UNKNOWN IMPORTED)
++    set_target_properties(DiscordRPC::discord-rpc PROPERTIES
++        IMPORTED_LOCATION "${DiscordRPC_LIBRARY}"
++        INTERFACE_INCLUDE_DIRECTORIES "${DiscordRPC_INCLUDE_DIR}"
++    )
++endif()
++
++mark_as_advanced(
++    DiscordRPC_INCLUDE_DIR
++    DiscordRPC_LIBRARY
++)
+diff --git a/externals/find-modules/FindVulkanHeaders.cmake b/externals/find-modules/FindVulkanHeaders.cmake
+new file mode 100644
+index 000000000000..4a36972f629f
+--- /dev/null
++++ b/externals/find-modules/FindVulkanHeaders.cmake
+@@ -0,0 +1,47 @@
++# SPDX-FileCopyrightText: 2022 Alexandre Bouvier <contact@amb.tf>
++#
++# SPDX-License-Identifier: GPL-3.0-or-later
++
++find_package(PkgConfig QUIET)
++if (PKG_CONFIG_FOUND)
++    pkg_search_module(VULKANHEADERS QUIET vulkanheaders vulkan-headers)
++endif()
++
++find_path(VulkanHeaders_INCLUDE_DIR
++    NAMES vulkan.h
++    HINTS ${VULKANHEADERS_INCLUDE_DIRS}
++    PATH_SUFFIXES vulkan
++)
++
++if (VulkanHeaders_INCLUDE_DIR)
++    file(READ "${VulkanHeaders_INCLUDE_DIR}/vulkan_core.h" _vulkan_core_file)
++    string(REGEX MATCH "#define[ \t]+VK_HEADER_VERSION_COMPLETE[ \t]+VK_MAKE_API_VERSION\\(([0-9]+),[ \t]*([0-9]+),[ \t]*([0-9]+),[ \t]*VK_HEADER_VERSION\\)" _dummy_var "${_vulkan_core_file}")
++    if (CMAKE_MATCH_COUNT EQUAL 3)
++        set(VulkanHeaders_VERSION_TWEAK ${CMAKE_MATCH_1})
++        set(VulkanHeaders_VERSION_MAJOR ${CMAKE_MATCH_2})
++        set(VulkanHeaders_VERSION_MINOR ${CMAKE_MATCH_3})
++        string(REGEX MATCH "#define[ \t]+VK_HEADER_VERSION[ \t]+([0-9]+)" _dummy_var "${_vulkan_core_file}")
++        if (CMAKE_MATCH_COUNT EQUAL 1)
++            set(VulkanHeaders_VERSION_PATCH ${CMAKE_MATCH_1})
++            set(VulkanHeaders_VERSION "${VulkanHeaders_VERSION_MAJOR}.${VulkanHeaders_VERSION_MINOR}.${VulkanHeaders_VERSION_PATCH}.${VulkanHeaders_VERSION_TWEAK}")
++        endif()
++    endif()
++    unset(_vulkan_core_file)
++    unset(_dummy_var)
++endif()
++
++include(FindPackageHandleStandardArgs)
++find_package_handle_standard_args(VulkanHeaders
++    REQUIRED_VARS VulkanHeaders_INCLUDE_DIR
++    VERSION_VAR VulkanHeaders_VERSION
++)
++
++if (VulkanHeaders_FOUND AND NOT TARGET Vulkan::Headers)
++    add_library(Vulkan::Headers INTERFACE IMPORTED)
++    set_target_properties(Vulkan::Headers PROPERTIES
++        INTERFACE_COMPILE_OPTIONS "${VULKANHEADERS_CFLAGS_OTHER}"
++        INTERFACE_INCLUDE_DIRECTORIES "${VulkanHeaders_INCLUDE_DIR}"
++    )
++endif()
++
++mark_as_advanced(VulkanHeaders_INCLUDE_DIR)
+diff --git a/externals/find-modules/Findenet.cmake b/externals/find-modules/Findenet.cmake
+new file mode 100644
+index 000000000000..4cf49d4c7838
+--- /dev/null
++++ b/externals/find-modules/Findenet.cmake
+@@ -0,0 +1,18 @@
++# SPDX-FileCopyrightText: 2022 Alexandre Bouvier <contact@amb.tf>
++#
++# SPDX-License-Identifier: GPL-3.0-or-later
++
++find_package(PkgConfig QUIET)
++if (PKG_CONFIG_FOUND)
++    pkg_search_module(ENET QUIET IMPORTED_TARGET GLOBAL libenet)
++    if (ENET_FOUND)
++        add_library(enet::enet ALIAS PkgConfig::ENET)
++        set(enet_VERSION ${ENET_VERSION})
++    endif()
++endif()
++
++include(FindPackageHandleStandardArgs)
++find_package_handle_standard_args(enet
++    REQUIRED_VARS ENET_LINK_LIBRARIES
++    VERSION_VAR enet_VERSION
++)
+diff --git a/externals/find-modules/Findhttplib.cmake b/externals/find-modules/Findhttplib.cmake
+index 0c7374c21d15..3c3fc7da8835 100644
+--- a/externals/find-modules/Findhttplib.cmake
++++ b/externals/find-modules/Findhttplib.cmake
+@@ -2,21 +2,22 @@
+ #
+ # SPDX-License-Identifier: GPL-2.0-or-later
+ 
+-find_package(httplib CONFIG)
+-if (NOT httplib_FOUND)
++include(FindPackageHandleStandardArgs)
++
++find_package(httplib QUIET CONFIG)
++if (httplib_FOUND)
++    find_package_handle_standard_args(httplib CONFIG_MODE)
++else()
+     find_package(PkgConfig QUIET)
+     if (PKG_CONFIG_FOUND)
+-        pkg_search_module(cpp-httplib IMPORTED_TARGET cpp-httplib)
+-        if (cpp-httplib_FOUND)
+-            set(httplib_FOUND True)
+-            set(HTTPLIB_VERSION "${cpp-httplib_VERSION}")
+-            add_library(httplib::httplib ALIAS PkgConfig::cpp-httplib)
++        pkg_search_module(HTTPLIB QUIET IMPORTED_TARGET GLOBAL cpp-httplib)
++        if (HTTPLIB_FOUND)
++            add_library(httplib::httplib ALIAS PkgConfig::HTTPLIB)
++            set(httplib_VERSION ${HTTPLIB_VERSION})
+         endif()
+     endif()
++    find_package_handle_standard_args(httplib
++        REQUIRED_VARS HTTPLIB_INCLUDEDIR
++        VERSION_VAR httplib_VERSION
++    )
+ endif()
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(httplib
+-    REQUIRED_VARS httplib_FOUND
+-    VERSION_VAR HTTPLIB_VERSION
+-)
+diff --git a/externals/find-modules/Findinih.cmake b/externals/find-modules/Findinih.cmake
+new file mode 100644
+index 000000000000..d2b6644ac233
+--- /dev/null
++++ b/externals/find-modules/Findinih.cmake
+@@ -0,0 +1,18 @@
++# SPDX-FileCopyrightText: 2022 Alexandre Bouvier <contact@amb.tf>
++#
++# SPDX-License-Identifier: GPL-3.0-or-later
++
++find_package(PkgConfig QUIET)
++if (PKG_CONFIG_FOUND)
++    pkg_search_module(INIREADER QUIET IMPORTED_TARGET GLOBAL INIReader)
++    if (INIREADER_FOUND)
++        add_library(inih::INIReader ALIAS PkgConfig::INIREADER)
++        set(inih_VERSION ${INIREADER_VERSION})
++    endif()
++endif()
++
++include(FindPackageHandleStandardArgs)
++find_package_handle_standard_args(inih
++    REQUIRED_VARS INIREADER_LINK_LIBRARIES
++    VERSION_VAR inih_VERSION
++)
+diff --git a/externals/find-modules/Findzstd.cmake b/externals/find-modules/Findzstd.cmake
+index f4031eb70125..62c93b73497a 100644
+--- a/externals/find-modules/Findzstd.cmake
++++ b/externals/find-modules/Findzstd.cmake
+@@ -1,19 +1,31 @@
+ # SPDX-FileCopyrightText: 2022 yuzu Emulator Project
+ # SPDX-License-Identifier: GPL-2.0-or-later
+ 
+-find_package(PkgConfig)
++include(FindPackageHandleStandardArgs)
+ 
+-if (PKG_CONFIG_FOUND)
+-    pkg_search_module(libzstd IMPORTED_TARGET GLOBAL libzstd)
+-    if (libzstd_FOUND)
+-        add_library(zstd::zstd ALIAS PkgConfig::libzstd)
++find_package(zstd QUIET CONFIG)
++if (zstd_FOUND)
++    find_package_handle_standard_args(zstd CONFIG_MODE)
++    if (NOT TARGET zstd::zstd)
++        if (TARGET zstd::libzstd_shared)
++            set_target_properties(zstd::libzstd_shared PROPERTIES IMPORTED_GLOBAL TRUE)
++            add_library(zstd::zstd ALIAS zstd::libzstd_shared)
++        else()
++            set_target_properties(zstd::libzstd_static PROPERTIES IMPORTED_GLOBAL TRUE)
++            add_library(zstd::zstd ALIAS zstd::libzstd_static)
++        endif()
++    endif()
++else()
++    find_package(PkgConfig QUIET)
++    if (PKG_CONFIG_FOUND)
++        pkg_search_module(ZSTD QUIET IMPORTED_TARGET GLOBAL libzstd)
++        if (ZSTD_FOUND)
++            add_library(zstd::zstd ALIAS PkgConfig::ZSTD)
++            set(zstd_VERSION ${ZSTD_VERSION})
++        endif()
+     endif()
++    find_package_handle_standard_args(zstd
++        REQUIRED_VARS ZSTD_LINK_LIBRARIES
++        VERSION_VAR zstd_VERSION
++    )
+ endif()
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(zstd
+-    REQUIRED_VARS
+-        libzstd_LINK_LIBRARIES
+-        libzstd_FOUND
+-    VERSION_VAR libzstd_VERSION
+-)
+diff --git a/externals/inih/CMakeLists.txt b/externals/inih/CMakeLists.txt
+index 827ac3bbcf31..ebb60a976e47 100644
+--- a/externals/inih/CMakeLists.txt
++++ b/externals/inih/CMakeLists.txt
+@@ -10,3 +10,4 @@ add_library(inih
+ 
+ create_target_directory_groups(inih)
+ target_include_directories(inih INTERFACE inih/cpp)
++add_library(inih::INIReader ALIAS inih)
+diff --git a/src/audio_core/CMakeLists.txt b/src/audio_core/CMakeLists.txt
+index 5fe1d5fa5f42..9c6bbd27d2d4 100644
+--- a/src/audio_core/CMakeLists.txt
++++ b/src/audio_core/CMakeLists.txt
+@@ -226,11 +226,11 @@ endif()
+ 
+ target_link_libraries(audio_core PUBLIC common core)
+ if (ARCHITECTURE_x86_64)
+-    target_link_libraries(audio_core PRIVATE dynarmic)
++    target_link_libraries(audio_core PRIVATE dynarmic::dynarmic)
+ endif()
+ 
+ if(ENABLE_CUBEB)
+-    target_link_libraries(audio_core PRIVATE cubeb)
++    target_link_libraries(audio_core PRIVATE cubeb::cubeb)
+     target_compile_definitions(audio_core PRIVATE -DHAVE_CUBEB=1)
+ endif()
+ if(ENABLE_SDL2)
+diff --git a/src/common/CMakeLists.txt b/src/common/CMakeLists.txt
+index 635fb85c895b..3837120abacd 100644
+--- a/src/common/CMakeLists.txt
++++ b/src/common/CMakeLists.txt
+@@ -189,10 +189,4 @@ endif()
+ create_target_directory_groups(common)
+ 
+ target_link_libraries(common PUBLIC ${Boost_LIBRARIES} fmt::fmt microprofile Threads::Threads)
+-target_link_libraries(common PRIVATE lz4::lz4 xbyak)
+-if (TARGET zstd::zstd)
+-  target_link_libraries(common PRIVATE zstd::zstd)
+-else()
+-  target_link_libraries(common PRIVATE
+-    $<IF:$<TARGET_EXISTS:zstd::libzstd_shared>,zstd::libzstd_shared,zstd::libzstd_static>)
+-endif()
++target_link_libraries(common PRIVATE lz4::lz4 xbyak::xbyak zstd::zstd)
+diff --git a/src/core/CMakeLists.txt b/src/core/CMakeLists.txt
+index 8db9a3c654cf..49c1914e136d 100644
+--- a/src/core/CMakeLists.txt
++++ b/src/core/CMakeLists.txt
+@@ -786,7 +786,7 @@ endif()
+ create_target_directory_groups(core)
+ 
+ target_link_libraries(core PUBLIC common PRIVATE audio_core network video_core)
+-target_link_libraries(core PUBLIC Boost::boost PRIVATE fmt::fmt nlohmann_json::nlohmann_json mbedtls Opus::opus)
++target_link_libraries(core PUBLIC Boost::boost PRIVATE fmt::fmt nlohmann_json::nlohmann_json MbedTLS::mbedcrypto Opus::opus)
+ if (MINGW)
+     target_link_libraries(core PRIVATE ${MSWSOCK_LIBRARY})
+ endif()
+@@ -805,5 +805,5 @@ if (ARCHITECTURE_x86_64)
+         arm/dynarmic/arm_dynarmic_cp15.cpp
+         arm/dynarmic/arm_dynarmic_cp15.h
+     )
+-    target_link_libraries(core PRIVATE dynarmic)
++    target_link_libraries(core PRIVATE dynarmic::dynarmic)
+ endif()
+diff --git a/src/dedicated_room/CMakeLists.txt b/src/dedicated_room/CMakeLists.txt
+index b674b915b792..31414cce0fe9 100644
+--- a/src/dedicated_room/CMakeLists.txt
++++ b/src/dedicated_room/CMakeLists.txt
+@@ -16,7 +16,7 @@ if (ENABLE_WEB_SERVICE)
+     target_link_libraries(yuzu-room PRIVATE web_service)
+ endif()
+ 
+-target_link_libraries(yuzu-room PRIVATE mbedtls)
++target_link_libraries(yuzu-room PRIVATE MbedTLS::mbedcrypto)
+ if (MSVC)
+     target_link_libraries(yuzu-room PRIVATE getopt)
+ endif()
+diff --git a/src/network/CMakeLists.txt b/src/network/CMakeLists.txt
+index 312f79b6869d..3d6f8cf41243 100644
+--- a/src/network/CMakeLists.txt
++++ b/src/network/CMakeLists.txt
+@@ -16,4 +16,4 @@ add_library(network STATIC
+ 
+ create_target_directory_groups(network)
+ 
+-target_link_libraries(network PRIVATE common enet Boost::boost)
++target_link_libraries(network PRIVATE common enet::enet Boost::boost)
+diff --git a/src/video_core/CMakeLists.txt b/src/video_core/CMakeLists.txt
+index 5b380835168b..18380f014c71 100644
+--- a/src/video_core/CMakeLists.txt
++++ b/src/video_core/CMakeLists.txt
+@@ -231,7 +231,7 @@ add_library(video_core STATIC
+ create_target_directory_groups(video_core)
+ 
+ target_link_libraries(video_core PUBLIC common core)
+-target_link_libraries(video_core PUBLIC glad shader_recompiler xbyak)
++target_link_libraries(video_core PUBLIC glad shader_recompiler xbyak::xbyak)
+ 
+ if (YUZU_USE_BUNDLED_FFMPEG AND NOT WIN32)
+     add_dependencies(video_core ffmpeg-build)
+@@ -243,8 +243,7 @@ target_link_options(video_core PRIVATE ${FFmpeg_LDFLAGS})
+ 
+ add_dependencies(video_core host_shaders)
+ target_include_directories(video_core PRIVATE ${HOST_SHADERS_INCLUDE})
+-target_include_directories(video_core PRIVATE sirit ../../externals/Vulkan-Headers/include)
+-target_link_libraries(video_core PRIVATE sirit)
++target_link_libraries(video_core PRIVATE sirit Vulkan::Headers)
+ 
+ if (ENABLE_NSIGHT_AFTERMATH)
+     if (NOT DEFINED ENV{NSIGHT_AFTERMATH_SDK})
+@@ -277,5 +276,5 @@ else()
+ endif()
+ 
+ if (ARCHITECTURE_x86_64)
+-    target_link_libraries(video_core PRIVATE dynarmic)
++    target_link_libraries(video_core PRIVATE dynarmic::dynarmic)
+ endif()
+diff --git a/src/web_service/CMakeLists.txt b/src/web_service/CMakeLists.txt
+index cbd4a814e87a..b548fada6238 100644
+--- a/src/web_service/CMakeLists.txt
++++ b/src/web_service/CMakeLists.txt
+@@ -16,4 +16,4 @@ add_library(web_service STATIC
+ )
+ 
+ create_target_directory_groups(web_service)
+-target_link_libraries(web_service PRIVATE common network nlohmann_json::nlohmann_json httplib::httplib cpp-jwt)
++target_link_libraries(web_service PRIVATE common network nlohmann_json::nlohmann_json httplib::httplib cpp-jwt::cpp-jwt)
+diff --git a/src/yuzu/CMakeLists.txt b/src/yuzu/CMakeLists.txt
+index 50007338fef5..d9bfbd0aea5f 100644
+--- a/src/yuzu/CMakeLists.txt
++++ b/src/yuzu/CMakeLists.txt
+@@ -301,7 +301,7 @@ target_link_libraries(yuzu PRIVATE common core input_common network video_core)
+ target_link_libraries(yuzu PRIVATE Boost::boost glad Qt::Widgets Qt::Multimedia)
+ target_link_libraries(yuzu PRIVATE ${PLATFORM_LIBRARIES} Threads::Threads)
+ 
+-target_include_directories(yuzu PRIVATE ../../externals/Vulkan-Headers/include)
++target_link_libraries(yuzu PRIVATE Vulkan::Headers)
+ if (NOT WIN32)
+     target_include_directories(yuzu PRIVATE ${Qt5Gui_PRIVATE_INCLUDE_DIRS})
+ endif()
+@@ -337,7 +337,7 @@ if (USE_DISCORD_PRESENCE)
+         discord_impl.cpp
+         discord_impl.h
+     )
+-    target_link_libraries(yuzu PRIVATE discord-rpc)
++    target_link_libraries(yuzu PRIVATE DiscordRPC::discord-rpc)
+     target_compile_definitions(yuzu PRIVATE -DUSE_DISCORD_PRESENCE)
+ endif()
+ 
+@@ -376,5 +376,5 @@ if (NOT APPLE)
+ endif()
+ 
+ if (ARCHITECTURE_x86_64)
+-    target_link_libraries(yuzu PRIVATE dynarmic)
++    target_link_libraries(yuzu PRIVATE dynarmic::dynarmic)
+ endif()
+diff --git a/src/yuzu_cmd/CMakeLists.txt b/src/yuzu_cmd/CMakeLists.txt
+index 7d8ca3d8a0b3..a967359f8b1c 100644
+--- a/src/yuzu_cmd/CMakeLists.txt
++++ b/src/yuzu_cmd/CMakeLists.txt
+@@ -31,7 +31,7 @@ add_executable(yuzu-cmd
+ create_target_directory_groups(yuzu-cmd)
+ 
+ target_link_libraries(yuzu-cmd PRIVATE common core input_common)
+-target_link_libraries(yuzu-cmd PRIVATE inih glad)
++target_link_libraries(yuzu-cmd PRIVATE inih::INIReader glad)
+ if (MSVC)
+     target_link_libraries(yuzu-cmd PRIVATE getopt)
+ endif()
+@@ -40,7 +40,7 @@ target_link_libraries(yuzu-cmd PRIVATE ${PLATFORM_LIBRARIES} SDL2 Threads::Threa
+ create_resource("../../dist/yuzu.bmp" "yuzu_cmd/yuzu_icon.h" "yuzu_icon")
+ target_include_directories(yuzu-cmd PRIVATE ${RESOURCES_DIR})
+ 
+-target_include_directories(yuzu-cmd PRIVATE ../../externals/Vulkan-Headers/include)
++target_link_libraries(yuzu-cmd PRIVATE Vulkan::Headers)
+ 
+ if (YUZU_USE_EXTERNAL_SDL2)
+     target_compile_definitions(yuzu-cmd PRIVATE -DYUZU_USE_EXTERNAL_SDL2)
