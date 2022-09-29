@@ -421,6 +421,8 @@ multilib_src_configure() {
 		-Degl=enabled
 		-Dgbm=enabled
 		-Dglvnd=true
+		-Db_lto=true
+		-Db_pgo=use
 		$(meson_feature gles1)
 		$(meson_feature gles2)
 		$(meson_feature llvm)
@@ -433,7 +435,7 @@ multilib_src_configure() {
 		-Dvalgrind=$(usex valgrind auto disabled)
 		-Dgallium-drivers=$(driver_list "${GALLIUM_DRIVERS[*]}")
 		-Dvulkan-drivers=$(driver_list "${VULKAN_DRIVERS[*]}")
-		--buildtype $(usex debug debug plain)
+		--buildtype release
 		-Db_ndebug=$(usex debug false true)
 	)
 	meson_src_configure
