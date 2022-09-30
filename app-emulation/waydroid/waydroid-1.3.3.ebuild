@@ -73,7 +73,9 @@ src_install() {
 }
 
 pkg_postinst() {
-	einfo "Waydroid currently doesn't work with AppArmor."
-	einfo "You have to either configure rules yourself or"
-	einfo "disable AppArmor while running the container."
+	if has_version "sys-apps/apparmor"; then
+		einfo "Waydroid currently doesn't work with AppArmor."
+		einfo "You have to either configure rules yourself or"
+		einfo "disable AppArmor while running the container."
+	fi
 }
