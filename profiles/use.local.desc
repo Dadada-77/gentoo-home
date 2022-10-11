@@ -2136,6 +2136,7 @@ dev-libs/poco:mongodb - Add dev-db/mongodb support
 dev-libs/poco:net - Classes to write network clients & servers
 dev-libs/poco:pagecompiler - Simple compiler translating HTML pages containing embedded C++ code into HTTPRequestHandler classes
 dev-libs/poco:pocodoc - POCO documentation generator
+dev-libs/poco:prometheus - Add prometheus monitoring system support
 dev-libs/poco:util - Several utility classes (like logger, timer, config file parser)
 dev-libs/poco:zip - Add support for the zip & gz archive formats
 dev-libs/ppl:cdd - Build the ppl_lcdd program for vertex/facet enumeration accepting the same input format as the programs shipped with sci-libs/cddlib and sci-libs/lrslib
@@ -2404,6 +2405,7 @@ dev-python/pillow:imagequant - Build with Image Quantization Library support
 dev-python/pivy:quarter - Use media-libs/quarter for GUI bindings
 dev-python/pivy:soqt - Use media-libs/SoQt for GUI bindings
 dev-python/py-amqp:extras - Install extra tools to generate initial Python mod from an AMQP XML file
+dev-python/pydantic:native-extensions - Compiles native "C" extensions.
 dev-python/pygame:midi - Enable midi support using media-libs/portmidi
 dev-python/pyglet:image - Enable support for image formats other than PNG and BMP
 dev-python/pyocr:cuneiform - Enable support for the app-text/cuneiform OCR engine
@@ -3062,7 +3064,6 @@ games-emulation/mupen64plus-core:new-dynarec - Enable new experimental dynamic r
 games-emulation/mupen64plus-core:opencv - Support video capture via media-libs/opencv
 games-emulation/mupen64plus-core:osd - Overlay emulator messages using on-screen-display
 games-emulation/mupen64plus-video-glide64mk2:hires - Support hi-resolution textures (requires dev-libs/boost)
-games-emulation/pcsx2:qt6 - Add support for the Qt 6 application and UI framework
 games-emulation/pcsx2:vulkan - Enable support for Vulkan
 games-emulation/pcsxr:archive - Support compressed files (via libarchive)
 games-emulation/pcsxr:ccdda - Support compressed CDDA (requires ffmpeg)
@@ -3597,7 +3598,10 @@ kde-misc/tellico:discid - Add support for reading disc IDs from audio CDs
 kde-misc/tellico:yaz - Add support for searching Z39.50 databases
 kde-plasma/discover:firmware - Enable support for firmware upgrades using sys-apps/fwupd
 kde-plasma/discover:flatpak - Enable support for flatpak repositories using sys-apps/flatpak
+kde-plasma/discover:webengine - Enable webflow support using dev-qt/qtwebview and dev-qt/qtwebengine instead of default URL handler
 kde-plasma/kde-cli-tools:kdesu - Build graphical frontend for kde-frameworks/kdesu
+kde-plasma/kdeplasma-addons:alternate-calendar - Support alternate calendar systems (currently Chinese or Indian) via dev-libs/icu
+kde-plasma/kdeplasma-addons:networkmanager - Disable wallpaper update when using metered connections
 kde-plasma/kdeplasma-addons:share - Enable applet for quickly sharing data to a variety of sources
 kde-plasma/kdeplasma-addons:webengine - Enable dictionary and web browser applets using dev-qt/qtwebengine
 kde-plasma/ksystemstats:networkmanager - Enable improved backend for Network statistics using kde-frameworks/networkmanager-qt
@@ -3635,8 +3639,10 @@ kde-plasma/plasma-nm:openconnect - Build support for the OpenConnect VPN client
 kde-plasma/plasma-nm:teamd - Enable Teamd control support
 kde-plasma/plasma-workspace:appstream - Enable AppStream software metadata support
 kde-plasma/plasma-workspace:geolocation - Enables dataengine providing location information
-kde-plasma/plasma-workspace:policykit - Build the Users KCM using sys-apps/accountsservice and sys-auth/polkit
+kde-plasma/plasma-workspace:policykit - Enable locale generation and Users KCM using sys-auth/polkit and sys-apps/accountsservice
+kde-plasma/plasma-workspace:screencast - Enable screencast portal using kde-plasma/kpipewire
 kde-plasma/plasma-workspace:telemetry - Enable User Feedback control module for kde-plasma/systemsettings
+kde-plasma/plasma-workspace:wallpaper-metadata - Show metadata for image wallpaper plugin using kde-apps/libkexiv2
 kde-plasma/powerdevil:brightness-control - Enable screen brightness control using app-misc/ddcutil
 kde-plasma/powerdevil:wireless - Enable wireless energy saving actions via kde-frameworks/bluez-qt and kde-frameworks/networkmanager-qt
 lxqt-base/liblxqt:backlight - Enable backlight control features.
@@ -5474,6 +5480,7 @@ net-analyzer/wireshark:text2pcap - Install text2pcap, to generate a capture file
 net-analyzer/wireshark:tfshark - Install tfshark, a terminal-based version of the FileShark capability
 net-analyzer/wireshark:tshark - Install tshark, to dump and analyzer network traffic from the command line
 net-analyzer/wireshark:udpdump - Install udpdump, to get packets exported from a source (like a network device or a GSMTAP producer) that are dumped to a pcap file
+net-analyzer/wireshark:wifi - Install wifidump, to dump and analyse 802.11 traffic
 net-analyzer/zabbix:agent - Enable zabbix agent (for to-be-monitored machines)
 net-analyzer/zabbix:agent2 - Enable go-based zabbix agent 2 (for to-be-monitored machines)
 net-analyzer/zabbix:frontend - Enable zabbix web frontend
@@ -7205,7 +7212,6 @@ sci-geosciences/gpsd:shm - export gpsd over shared memory
 sci-geosciences/gpsd:sockets - export gpsd over unix sockets
 sci-geosciences/grass:geos - Use sci-libs/geos for v.buffer and adds extended options to the v.select module
 sci-geosciences/grass:las - Include support for LAS and LAZ encoded LiDAR files through sci-geosciences/liblas
-sci-geosciences/grass:liblas - Include support for LAS and LAZ encoded LiDAR files through sci-geosciences/liblas
 sci-geosciences/grass:opencl - Enable OpenCL support
 sci-geosciences/grass:pdal - Enable support for PDAL for point clouds via sci-libs/pdal
 sci-geosciences/gshhs:data - Add earth data with sci-geosciences/gshhs-data
@@ -7337,12 +7343,10 @@ sci-libs/flann:cuda - Enable support for nVidia CUDA
 sci-libs/flann:octave - Add bindings for sci-mathematics/octave
 sci-libs/fplll:qd - Use sci-libs/qd for quad-double datatype
 sci-libs/gdal:armadillo - Use sci-libs/armadillo for faster TPS transform computation
-sci-libs/gdal:aux-xml - Enable Portable Auxilliary Metadata generation
 sci-libs/gdal:fits - Enable support for NASA's sci-libs/cfitsio library
 sci-libs/gdal:geos - Add support for geometry engine (sci-libs/geos)
 sci-libs/gdal:gml - Enable support for dev-libs/xerces-c C++ API
 sci-libs/gdal:heif - Enable support for ISO/IEC 23008-12:2017 HEIF/HEIC image format using media-libs/libheif
-sci-libs/gdal:mdb - Enable support for Microsoft Access database
 sci-libs/gdal:ogdi - Enable support for the open geographic datastore interface (sci-libs/ogdi)
 sci-libs/gdal:opencl - Enable OpenCL support
 sci-libs/gdal:spatialite - Enable Spatial DBMS over sqlite dev-db/spatialite
@@ -8223,10 +8227,12 @@ sys-devel/binutils-hppa64:plugins - Enable plugin support in tools
 sys-devel/clang:default-compiler-rt - Use compiler-rt instead of libgcc as the default rtlib for clang
 sys-devel/clang:default-libcxx - Use libc++ instead of libstdc++ as the default stdlib for clang
 sys-devel/clang:default-lld - Use lld as the default linker for clang
+sys-devel/clang:extra - Build extra tools (clangd, clang-tidy and a few more)
 sys-devel/clang:static-analyzer - Install the Clang static analyzer
 sys-devel/clang-common:default-compiler-rt - Use compiler-rt + libunwind instead of libgcc as the default rtlib for clang
 sys-devel/clang-common:default-libcxx - Use libc++ instead of libstdc++ as the default stdlib for clang
 sys-devel/clang-common:default-lld - Use lld as the default linker for clang
+sys-devel/clang-common:stricter - Default to stricter behavior known from newer clang versions, turning more warnings into errors
 sys-devel/clang-runtime:compiler-rt - Install sys-libs/compiler-rt for -rtlib=compiler-rt
 sys-devel/clang-runtime:libcxx - Install sys-libs/libcxx for -stdlib=libc++
 sys-devel/clang-runtime:openmp - Install sys-libs/libomp for -fopenmp support
@@ -8473,6 +8479,7 @@ sys-libs/libcxxabi:libunwind - Use libunwind instead of libgcc_s for stack unwin
 sys-libs/libnvme:json - Support JSON output via dev-libs/json-c
 sys-libs/libnvme:uuid - UUID support via sys-apps/util-linux
 sys-libs/libomp:cuda - Build CUDA offloading plugin (only with USE=offload)
+sys-libs/libomp:gdb-plugin - Build OMPD GDB plugin
 sys-libs/libomp:hwloc - Enable CPU affinity support via hwloc
 sys-libs/libomp:offload - Support offloading OpenMP using libomptarget
 sys-libs/libomp:ompt - Enable OpenMP Tools Interface support
