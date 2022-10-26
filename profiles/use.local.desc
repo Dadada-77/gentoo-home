@@ -659,18 +659,13 @@ app-emulation/wine-staging:opencl - Enable OpenCL support
 app-emulation/wine-staging:osmesa - Enable off-screen rendering (OpenGL in bitmaps) support
 app-emulation/wine-staging:pcap - Support packet capture software (e.g. wireshark)
 app-emulation/wine-staging:perl - Install helpers that require perl (winedump/winemaker)
-app-emulation/wine-staging:pipelight - Apply Wine-Staging patches for Pipelight/Silverlight support
-app-emulation/wine-staging:realtime - Pull in sys-auth/rtkit for low-latency pulseaudio support
-app-emulation/wine-staging:run-exes - Use Wine to open and run .EXE and .MSI files
 app-emulation/wine-staging:samba - Pull in net-fs/samba with winbind for NTLM auth support
 app-emulation/wine-staging:sdl - Enable gamepad support using media-libs/libsdl2
-app-emulation/wine-staging:staging - Apply Wine-Staging patches for advanced feature support that haven't made it into upstream Wine yet
 app-emulation/wine-staging:vulkan - Enable Vulkan drivers
 app-emulation/wine-vanilla:capi - Enable ISDN support using net-libs/libcapi
 app-emulation/wine-vanilla:crossdev-mingw - Use sys-devel/crossdev for the toolchain rather than dev-util/mingw64-toolchain (requires manual setting up)
 app-emulation/wine-vanilla:dos - Pull in games-emulation/dosbox to run DOS applications
 app-emulation/wine-vanilla:gecko - Enable mshtml support using app-emulation/wine-gecko
-app-emulation/wine-vanilla:gssapi - Use GSSAPI (Kerberos SSP support)
 app-emulation/wine-vanilla:mingw - Build PE files using a MinGW toolchain for better compatibility
 app-emulation/wine-vanilla:mono - Enable .NET support using app-emulation/wine-mono
 app-emulation/wine-vanilla:netapi - Enable support for configuring remote shares using net-fs/samba
@@ -678,8 +673,6 @@ app-emulation/wine-vanilla:opencl - Enable OpenCL support
 app-emulation/wine-vanilla:osmesa - Enable off-screen rendering (OpenGL in bitmaps) support
 app-emulation/wine-vanilla:pcap - Support packet capture software (e.g. wireshark)
 app-emulation/wine-vanilla:perl - Install helpers that require perl (winedump/winemaker)
-app-emulation/wine-vanilla:realtime - Pull in sys-auth/rtkit for low-latency pulseaudio support
-app-emulation/wine-vanilla:run-exes - Use Wine to open and run .EXE and .MSI files
 app-emulation/wine-vanilla:samba - Pull in net-fs/samba with winbind for NTLM auth support
 app-emulation/wine-vanilla:sdl - Enable gamepad support using media-libs/libsdl2
 app-emulation/wine-vanilla:vkd3d - Enable DirectX 12 support using app-emulation/vkd3d
@@ -1666,7 +1659,6 @@ dev-lang/lazarus:minimal - Don't build extra packages from the bigide component
 dev-lang/logtalk:fop - Support for generating pdf documentation using fop
 dev-lang/logtalk:xslt - Support for generating html documentation using xslt
 dev-lang/lua:deprecated - make deprecated data structures/routines available
-dev-lang/lua:test-complete - Run the complete (non-portable) testsuite
 dev-lang/luajit:lua52compat - Enable some upwards-compatible features from Lua 5.2 that are unlikely to break existing code.
 dev-lang/mercury:erlang - Support Mercury Erlang grade
 dev-lang/mercury:trail - Support Mercury trail grades
@@ -2809,6 +2801,7 @@ dev-util/glade:gjs - Build catalog support for dev-libs/gjs widgets.
 dev-util/glade:webkit - Build catalog support for net-libs/webkit-gtk:4 widgets.
 dev-util/global:vim - Integrate the GNU GLOBAL source code tag system with Vim
 dev-util/gnome-builder:clang - Provide integration with sys-devel/clang for best possible C/C++ autocompletion, semantic highlighting, symbol resolving, and diagnostics support
+dev-util/gnome-builder:d-spy - Provide D-Bus debugging functionality via dev-util/d-spy
 dev-util/gnome-builder:devhelp - Provide API docs browsing and integration via dev-util/devhelp
 dev-util/gnome-builder:flatpak - Enable support for flatpak applications using sys-apps/flatpak
 dev-util/gnome-builder:git - Provide support for the Git version control system via dev-libs/libgit2-glib (such as setup of Git for New Project, direct cloning for Open Project and changed lines indicators in the editor gutter)
@@ -2907,7 +2900,6 @@ dev-vcs/darcs:terminfo - Use the terminfo package for enhanced console support.
 dev-vcs/darcs:threaded - Use threading and SMP support.
 dev-vcs/fossil:fusefs - Enable the Fuse Filesystem
 dev-vcs/fossil:json - Enable the JSON API of Fossil's wiki
-dev-vcs/fossil:miniz - Use the bundled miniz for compression instead of zlib. Incompatible with ssl.
 dev-vcs/fossil:system-sqlite - Use the system SQLite instead of the bundled one
 dev-vcs/fossil:tcl-private-stubs - Enable Tcl integration via private stubs mechanism
 dev-vcs/fossil:tcl-stubs - Enable Tcl integration via stubs library mechanism
@@ -2977,7 +2969,8 @@ games-action/minetest:redis - Enable redis backend via dev-libs/hiredis
 games-action/minetest:server - Build Minetest server
 games-action/minetest:spatial - Enable SpatialIndex AreaStore backend
 games-action/polymc:lto - Enable link-time optimization
-games-action/polymc:qt6 - Build with Qt6 support instead of the default Qt5
+games-action/prismlauncher:lto - Enable link-time optimization
+games-action/prismlauncher:qt6 - Build with Qt6 support instead of the default Qt5
 games-action/supermariowar:server - Compile and install Super Mario War server files
 games-action/supertuxkart:nettle - Use dev-libs/nettle crypto backend
 games-action/supertuxkart:recorder - Enable recording with media-libs/libopenglrecorder
@@ -3064,6 +3057,7 @@ games-emulation/mupen64plus-core:new-dynarec - Enable new experimental dynamic r
 games-emulation/mupen64plus-core:opencv - Support video capture via media-libs/opencv
 games-emulation/mupen64plus-core:osd - Overlay emulator messages using on-screen-display
 games-emulation/mupen64plus-video-glide64mk2:hires - Support hi-resolution textures (requires dev-libs/boost)
+games-emulation/pcsx2:sndio - Enable support for the media-sound/sndio backend
 games-emulation/pcsx2:vulkan - Enable support for Vulkan
 games-emulation/pcsxr:archive - Support compressed files (via libarchive)
 games-emulation/pcsxr:ccdda - Support compressed CDDA (requires ffmpeg)
@@ -3695,7 +3689,6 @@ mail-client/claws-mail:archive - Enable archiving plugin
 mail-client/claws-mail:bogofilter - Build mail-filter/bogofilter plugin
 mail-client/claws-mail:dillo - Enable dillo html viewer plugin
 mail-client/claws-mail:gdata - Enable plugin for access to Google data providers
-mail-client/claws-mail:gtk2 - Build support for GTK+-2 instead of GTK+-3 (live ebuild only)
 mail-client/claws-mail:libcanberra - Enable sound notification in connection with USE=notification
 mail-client/claws-mail:libnotify - Enable notification on the desktop in connection with USE=notification
 mail-client/claws-mail:litehtml - Enable dev-libs/gumbo html viewer plugin
@@ -3858,6 +3851,7 @@ mate-base/mate:help - Install gnome-extra/yelp to handle in application help men
 mate-base/mate:notification - Force notification daemon to default to MATE's notification daemon. Enabled by default. Disable if it causes conflicts with other installed desktop environments.
 mate-base/mate:themes - Install MATE Desktop's themes; if you use other themes, you can disable this to spare some space and time.
 mate-base/mate-applets:cpupower - Enable support for cpu frequency manipulation using sys-power/cpupower
+mate-base/mate-applets:netlink - Use dev-libs/libnl
 mate-base/mate-applets-meta:appindicator - Pull in mate-extra/mate-indicator-applet for AppIndicator applet
 mate-base/mate-applets-meta:sensors - Pull in mate-extra/mate-sensors-applet for hw sensors applet
 mate-base/mate-control-center:accountsservice - Add support for AccountsService
@@ -4020,8 +4014,9 @@ media-gfx/freecad:techdraw - Build the techdraw module and workbench, a more adv
 media-gfx/freecad:tux - Build the Tux module
 media-gfx/geeqie:ffmpegthumbnailer - Enable video thumbnail support with media-video/ffmpegthumbnailer
 media-gfx/geeqie:gpu-accel - Enable GPU acceleration support - experimental
-media-gfx/geeqie:gtk3 - Link against x11-libs/gtk+:3 instead of x11-libs/gtk+:2
-media-gfx/geeqie:map - Enable items map display - experimental
+media-gfx/geeqie:heif - Enable support for ISO/IEC 23008-12:2017 HEIF/HEIC image format using media-libs/libheif
+media-gfx/geeqie:jpegxl - Enable support for JPEG XL image format
+media-gfx/geeqie:map - Enable items GPS map display
 media-gfx/gimp:heif - Enable support for ISO/IEC 23008-12:2017 HEIF files
 media-gfx/gimp:jpegxl - Enable support for JPEG XL image format
 media-gfx/gimp:vector-icons - Enable support for vector icons (experimental)
@@ -4072,7 +4067,6 @@ media-gfx/krita:heif - Enable support for ISO/IEC 23008-12:2017 HEIF/HEIC image 
 media-gfx/krita:jpegxl - Support for JPEG XL image format
 media-gfx/krita:mypaint-brush-engine - Enable MyPaint brush engine support media-libs/libmypaint
 media-gfx/krita:qtmedia - Enable sound support for animations via dev-qt/qtmultimedia
-media-gfx/krita:vc - Enable support for dev-libs/vc, could be a significant speed boost
 media-gfx/librecad:tools - Build additional tool programs: tff2lff
 media-gfx/luminance-hdr:fits - Enable support for the FITS format
 media-gfx/mandelbulber:opencl - Enable GPU rendering support using OpenCL
@@ -4255,7 +4249,6 @@ media-libs/libheif:go - Enable building dev-lang/go code/examples
 media-libs/libheif:rav1e - Use media-video/rav1e for AVIF encoding
 media-libs/libheif:x265 - Use media-libs/x265 for HEIF encoding
 media-libs/libjxl:gdk-pixbuf - Build a gdk-pixbuf loader
-media-libs/libjxl:gimp210 - Enable plugin for GIMP 2.10.x series
 media-libs/liblastfm:fingerprint - Build the lastfm-fingerprint library
 media-libs/libmp4v2:utils - Install command-line utilities
 media-libs/libmypaint:gegl - Add support for media-libs/gegl
@@ -4291,6 +4284,11 @@ media-libs/libsdl2:sound - Control audio support (disable at your own risk)
 media-libs/libsdl2:video - Control video support (disable at your own risk)
 media-libs/libsdl2:vulkan - Enable Vulkan support
 media-libs/libtgvoip:dsp - Enable signal processing (echo cancellation, noise suppression, and automatic gain control)
+media-libs/libva:drm - Enables VA/DRM API support.
+media-libs/libva-compat:drm - Enables VA/DRM API support.
+media-libs/libva-compat:egl - Enables EGL support.
+media-libs/libva-intel-driver:hybrid - Enable support for hybrid vaapi hardware acceleration on Intel Haswell and newer architectures
+media-libs/libva-intel-media-driver:redistributable - Install redistributable media kernel binaries (no source code) files (primarily needed for video encoding support)
 media-libs/libvisio:tools - Build conversion tools
 media-libs/libvmaf:embed-models - Compile default vmaf models into the library (needs app-editors/vim-core)
 media-libs/libvpx:highbitdepth - Enable 10 and 12 bit support for VP9.
@@ -4805,6 +4803,7 @@ media-sound/shntool:shorten - Add support for the shorten audio compressor
 media-sound/snapcast:client - Build and install Snapcast client component
 media-sound/snapcast:server - Build and install Snapcast server component
 media-sound/snapcast:tremor - Build with TREMOR version of vorbis
+media-sound/snd:notcurses - Terminal interface via dev-cpp/notcurses
 media-sound/snd:s7 - Enable the s7 extension language (a version of Scheme)
 media-sound/sonic-visualiser:id3tag - Enables ID3 tagging with id3tag library
 media-sound/sox:amr - Enables Adaptive Multi-Rate Audio support
@@ -5260,7 +5259,6 @@ net-analyzer/echoping:priority - enable socket priority support.
 net-analyzer/echoping:smtp - enable support for SMTP protocol.
 net-analyzer/echoping:tos - enable support for TOS (TYpe Of Service).
 net-analyzer/ettercap:plugins - Install ettercap plugins (et_*.so)
-net-analyzer/flent:plots - Enable drawing plots
 net-analyzer/flowgrind:pcap - Enable packet capturing support using net-libs/libpcap
 net-analyzer/fprobe:messages - enable console messages
 net-analyzer/goaccess:geoipv2 - Enable support for GeoIP2 through dev-libs/libmaxminddb
@@ -5586,6 +5584,9 @@ net-dns/knot:synthrecord - Enable the automatic forward/reverse records module
 net-dns/knot:utils - Install Knot utilities, such as kdig, kzonecheck, ...
 net-dns/knot:whoami - Enable the whoami response module
 net-dns/knot:xdp - Enable eXpress Data Path
+net-dns/knot-resolver:dnstap - Build dnstap binary logging module
+net-dns/knot-resolver:kresc - Build (experimental) command-line client
+net-dns/knot-resolver:nghttp2 - DNS-over-HTTPS support
 net-dns/mydns:alias - Enable David Phillips aliasing
 net-dns/mydns:status - Enable the STATUS opcode to check server status
 net-dns/nsd:bind8-stats - Enables BIND8 like NSTATS and XSTATS
@@ -6430,14 +6431,8 @@ net-misc/electron-cash:sync - Enable plugin to sync wallet metadata across multi
 net-misc/electron-cash:vkb - Enable plugin for virtual keyboard
 net-misc/electrum:cli - Enables the CLI interface
 net-misc/electrum:qrcode - Enable QR code scanning with media-gfx/zbar
-net-misc/electrum-ltc:audio_modem - Enable plugin to support Audio Modem
 net-misc/electrum-ltc:cli - Enables the CLI interface
-net-misc/electrum-ltc:cosign - Enable plugin to support multisig wallets between multiple Electrum clients
-net-misc/electrum-ltc:digitalbitbox - Enable plugin to support Digital Bitbox hardware wallet
-net-misc/electrum-ltc:email - Enable plugin to support emailing invoices
 net-misc/electrum-ltc:qrcode - Enable QR code scanning with media-gfx/zbar
-net-misc/electrum-ltc:sync - Enable plugin to sync wallet metadata across multiple Electrum clients
-net-misc/electrum-ltc:vkb - Enable plugin for virtual keyboard
 net-misc/etherdfs:tsr - Build the TSR program for DOS, which acts as a client.
 net-misc/ethflop:tsr - Build the TSR program for DOS, which acts as a client.
 net-misc/eventd:libcanberra - Enable plugin for sounds via media-libs/libcanberra
@@ -7314,7 +7309,6 @@ sci-libs/dealii:arpack - Adds support for ARPACK (sci-libs/arpack)
 sci-libs/dealii:assimp - Add support for assimp (media-libs/assimp)
 sci-libs/dealii:cgal - Adds support for CGAL (sci-mathematics/cgal)
 sci-libs/dealii:cuda - Add support for cuda (dev-util/nvidia-cuda-sdk)
-sci-libs/dealii:debug - Build an additional debug library with extra debug codepaths, like asserts and extra output. If you want to get meaningful backtraces see <https://www.gentoo.org/proj/en/qa/backtraces.xml>
 sci-libs/dealii:ginkgo - Add support for ginkgo (sci-libs/ginkgo)
 sci-libs/dealii:gmsh - Add support for gmsh (sci-libs/gmsh)
 sci-libs/dealii:metis - Add support for metis (sci-libs/metis)
@@ -7534,6 +7528,7 @@ sci-libs/vtk:gdal - Support for gdal formated data
 sci-libs/vtk:imaging - Building Imaging modules
 sci-libs/vtk:json - Support for json formatted data
 sci-libs/vtk:kits - Build kits in addition to modules
+sci-libs/vtk:logging - Enable the loguru logging module
 sci-libs/vtk:offscreen - Offscreen rendering through OSMesa
 sci-libs/vtk:pegtl - Use pegtl to build parsers
 sci-libs/vtk:qt6 - Use Qt6 packages instead of Qt5
@@ -8238,6 +8233,7 @@ sys-devel/clang-runtime:libcxx - Install sys-libs/libcxx for -stdlib=libc++
 sys-devel/clang-runtime:openmp - Install sys-libs/libomp for -fopenmp support
 sys-devel/clang-runtime:sanitize - Enable compiler-rt sanitizer (-fsanitize*) support
 sys-devel/clang-toolchain-symlinks:gcc-symlinks - Install symlinks for 'gcc' and 'g++' for extra compatibility.
+sys-devel/clang-toolchain-symlinks:multilib-symlinks - Install symlinks for all ABI CHOSTs. Note that this can result in gcc being overrode for native builds, as well as conflict with crossdev if used for the same targets.
 sys-devel/clang-toolchain-symlinks:native-symlinks - Install generic tool symlinks like 'cc' and 'c++', as well as ${CTARGET}-*. These symlinks are installed into slotted LLVM bindir, so they should not take precedence over symlinks installed into /usr/bin by sys-devel/gcc-config but they can be helpful for GCC-free setups.
 sys-devel/distcc:gssapi - Enable support for net-libs/libgssglue
 sys-devel/gcc:ada - Build the ADA language (GNAT) frontend
@@ -8275,6 +8271,7 @@ sys-devel/gdb:xml - Support parsing XML data files needed (at least) for cpu fea
 sys-devel/gdb:xxhash - Use dev-libs/xxhash to speed up internal hashing.
 sys-devel/gettext:cvs - When running `autopoint`, use cvs to store the internal development files; this requires cvs at runtime, but will be faster/smaller than raw archives
 sys-devel/gettext:git - When running `autopoint`, use git to store the internal development files; this requires git at runtime, but will be faster/smaller than raw archives
+sys-devel/lld-toolchain-symlinks:multilib-symlinks - Install symlinks for all ABI CHOSTs. Note that this can result in gcc being overrode for native builds, as well as conflict with crossdev if used for the same targets.
 sys-devel/lld-toolchain-symlinks:native-symlinks - Install generic 'ld' symlink, as well as ${CTARGET}-ld. These symlinks are installed into slotted LLVM bindir, so they should not take precedence over symlinks installed into /usr/bin by sys-devel/binutils-config but they can be helpful for binutils-free setups.
 sys-devel/llvm:binutils-plugin - Build the binutils plugin
 sys-devel/llvm:doc - Build and install the HTML documentation and regenerate the man pages
@@ -8283,6 +8280,7 @@ sys-devel/llvm:ncurses - Support querying terminal properties using ncurses' ter
 sys-devel/llvm:xar - Support dumping LLVM bitcode sections in Mach-O files (uses app-arch/xar)
 sys-devel/llvm:z3 - Enable support for sci-mathematics/z3 constraint solver
 sys-devel/llvm-roc:runtime - Builds the compiler runtime libraries.
+sys-devel/llvm-toolchain-symlinks:multilib-symlinks - Install symlinks for all ABI CHOSTs. Note that this can result in gcc being overrode for native builds, as well as conflict with crossdev if used for the same targets.
 sys-devel/llvm-toolchain-symlinks:native-symlinks - Install generic tool symlinks like 'objdump' and 'ranlib', as well as ${CTARGET}-*. These symlinks are installed into slotted LLVM bindir, so they should not take precedence over symlinks installed into /usr/bin by sys-devel/binutils-config but they can be helpful for binutils-free setups.
 sys-devel/mold:system-tbb - Use dev-cpp/tbb package instead of vendored copy
 sys-devel/parity:vc10_0 - Enable support for Visual Studio 2010
@@ -8488,6 +8486,7 @@ sys-libs/libselinux:pcre2 - Use dev-libs/libpcre2 for fcontext regexes
 sys-libs/libunwind:debug-frame - Adds support for DWARF .debug_frame section: Use the information from this section if available
 sys-libs/libunwind:libatomic - Use libatomic instead of builtin atomic operations
 sys-libs/libxcrypt:compat - Build with compatibility interfaces for other crypt implementations
+sys-libs/libxcrypt:headers-only - Build and install only the headers.
 sys-libs/libxcrypt:system - Install as system libcrypt.so rather than to an alternate directory (will collide with sys-libs/glibc's version)
 sys-libs/llvm-libunwind:clang - Force building using installed clang (rather than the default CC/CXX; required for testing).
 sys-libs/minizip-ng:compat - Enable compatibility with sys-libs/zlib's USE=minizip
@@ -8869,11 +8868,6 @@ x11-libs/libdrm:valgrind - Compile in valgrind memory hints
 x11-libs/libfm:automount - Use gnome-base/gvfs for automounting
 x11-libs/libfm:udisks - Use libfm's udisks-based volume monitor implementation instead of using the one from gvfs
 x11-libs/libfm:vala - Support custom actions in menus
-x11-libs/libva:drm - Enables VA/DRM API support.
-x11-libs/libva-compat:drm - Enables VA/DRM API support.
-x11-libs/libva-compat:egl - Enables EGL support.
-x11-libs/libva-intel-driver:hybrid - Enable support for hybrid vaapi hardware acceleration on Intel Haswell and newer architectures
-x11-libs/libva-intel-media-driver:redistributable - Install redistributable media kernel binaries (no source code) files (primarily needed for video encoding support)
 x11-libs/libwnck:tools - Install wnckprop-3 and wnck-urgency-monitor-3 command-line tools
 x11-libs/libxcb:xkb - Enable the XCB keyboard extension
 x11-libs/libxkbcommon:tools - Build the xkbcli tools
@@ -8884,6 +8878,7 @@ x11-libs/pixman:loongson2f - Enable Loongson2f MMI optimizations.
 x11-libs/qscintilla:designer - Build plugin for Qt Designer
 x11-libs/qwt:designer - Installs dev-qt/designer plugin.
 x11-libs/qwt:mathml - Use the MathML renderer of the Qt solutions package.
+x11-libs/qwt:polar - Install the QwtPolar headers
 x11-libs/tslib:evdev - Build experimental input module
 x11-libs/tslib:uinput - Provide alternative ts_uinput evdev device
 x11-libs/vte:icu - Enable legacy charset support using dev-libs/icu
@@ -9110,6 +9105,7 @@ x11-wm/jwm:pango - Bidirectional text layout support with pango using xft backen
 x11-wm/lumina:desktop-utils - Build and install lumina's desktop-utils
 x11-wm/metacity:libcanberra - Enable sound event support using media-libs/libcanberra
 x11-wm/metacity:vulkan - Enable Vulkan based compositor support via META_COMPOSITOR=vulkan environment variable
+x11-wm/muffin:sysprof - Enable profiling data capture support using dev-util/sysprof-capture
 x11-wm/musca:apis - Optionally install the experimental `apis' window manager
 x11-wm/musca:xlisten - Optionally install the xlisten utility
 x11-wm/mutter:elogind - Rely on sys-auth/elogind as logind provider for Wayland sessions
@@ -9126,7 +9122,6 @@ x11-wm/stumpwm:contrib - Install contrib modules
 x11-wm/stumpwm:doc - Include documentation
 x11-wm/subtle:xrandr - Enable support for the X RandR extension
 x11-wm/subtle:xtest - Enable support for the XTest extension
-x11-wm/vtwm:rplay - Enable rplay support, needed for sound.
 x11-wm/windowmaker:modelock - Enable XKB language status lock support. README says: "If you don't know what it is you probably don't need it."
 x11-wm/windowmaker:xrandr - Enable XRandR window extension support
 x11-wm/wmfs:imlib2 - Enable image support through media-libs/imlib2

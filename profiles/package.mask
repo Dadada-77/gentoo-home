@@ -33,14 +33,136 @@
 
 #--- END OF EXAMPLES ---
 
+# Sam James <sam@gentoo.org> (2022-10-25)
+# Fails to build with Clang 16 but also modern linux-headers. No activity upstream.
+# Removal on 2022-10-25. bug #874420.
+net-misc/wol
+
+# Sam James <sam@gentoo.org> (2022-10-24)
+# Non-free licence which prohibits any patching. Fails to build with Clang 16.
+# Removal on 2022-10-24.
+dev-util/sgb
+sci-misc/gt-itm
+
+# Sam James <sam@gentoo.org> (2022-10-24)
+# Fails to build with Clang 16 (code quality issues), no upstream activity
+# in 7 years. Removal on 2022-11-23. bug #874486, bug #791604.
+games-fps/qudos
+
+# David Seifert <soap@gentoo.org> (2022-10-23)
+# Dead package, upstream gone, GTK+2, fails to build with Clang 16 and
+# tests fail. Removal on 2022-11-22. Bug #741200, #875686.
+sci-calculators/grpn
+
+# Hans de Graaff <graaff@gentoo.org> (2022-10-22)
+# Last release upstream 10 years ago. No longer compiles with latest
+# clang (bug #875254) and doubtful that this actually works with recent
+# ruby versions.
+# Masked for removal in 30 days.
+dev-ruby/ruby-sdl
+
+# Michał Górny <mgorny@gentoo.org> (2022-10-21)
+# Barely maintained upstream.  Still lacking support for Python 3.10.
+# All revdeps in Gentoo were pure test deps, and only optional
+# (because they would otherwise block Python 3.10).
+# Removal on 2022-11-20.  Bug #845723.
+dev-python/eventlet
+
+# David Seifert <soap@gentoo.org> (2022-10-18)
+# Dead package, use dev-util/nvidia-cuda-toolkit instead. Examples were
+# removed in 11.6, no revdeps left. Removal on 2022-11-17.
+# Bug #722092, #749900, #762169, #840656, #845381, #858392, #866701.
+dev-util/nvidia-cuda-sdk
+
+# Andrew Ammerlaan <andrewammerlaan@gentoo.org> (2022-10-17)
+# Hostile takeover ongoing, integrity cannot be guaranteed.
+# Use the release version only if you change the meta server setting.
+# Use games-action/multimc-bin or games-action/prismlauncher instead
+# to be completely safe.
+# https://bugs.gentoo.org/877495
+#
+# Update (2022-10-20)
+# Removal in 15 days, please install games-action/prismlauncher instead
+games-action/polymc
+
+# Michał Górny <mgorny@gentoo.org> (2022-10-17)
+# Unmaintained since 2018.  Requires dev-python/nose.  No revdeps left.
+# Removal on 2022-11-16.  Bug #877375.
+dev-python/case
+
+# Michał Górny <mgorny@gentoo.org> (2022-10-17)
+# dev-python/nose plugin.  No revdeps left.
+# Removal on 2022-11-16.  Bug #877369.
+dev-python/nose_warnings_filters
+
+# John Helmert III <ajak@gentoo.org> (2022-10-16)
+# <OpenSSL-1.1.1 are EOL and contain known vulnerabilities. Users should
+# migrate to a newer branch.
+<dev-libs/openssl-1.1.1
+
+# Matt Turner <mattst88@gentoo.org> (2022-10-14)
+# Last upstream release in 2013. Last upstream commit in 2019. No maintainer in
+# Gentoo. No reverse dependencies. EAPI=6.
+# Depends on unmaintained packages:
+# 	- x11-libs/vte:0
+# Bug #811540.
+# Removal on 2022-11-14
+x11-terms/lilyterm
+
+# Matt Turner <mattst88@gentoo.org> (2022-10-14)
+# Unmaintained upstream with last commit in 2013. No reverse dependencies.
+# Depends on unmaintained packages:
+# 	- x11-libs/gtk+:2
+# 	- x11-libs/vte:0
+# Bugs #769131, #875704.
+# Removal on 2022-11-14
+x11-misc/gtkdialog
+
+# Matt Turner <mattst88@gentoo.org> (2022-10-14)
+# Unmaintained upstream. Last release in 2008. Only reverse dependency is
+# gnome-mud, which is masked for removal.
+# Bugs #349301, #713152, #802723, #808435, #870730, #877079.
+# Removal on 2022-11-14
+net-libs/gnet
+
+# Matt Turner <mattst88@gentoo.org> (2022-10-14)
+# Needs upstream work to modernize codebase. Depends on lots of unmaintained
+# packages:
+# 	- app-text/rarian
+# 	- gnome-base/gconf
+# 	- gnome-base/libglade
+# 	- net-libs/gnet:2
+# 	- x11-libs/gtk+:2
+# 	- x11-libs/vte:0
+# Bugs #670904, #873859
+# Removal on 2022-11-14
+games-mud/gnome-mud
+
+# Joshua Kinard <kumba@gentoo.org> (2022-10-13)
+# Difficult-to-resolve build issues on modern toolchains,
+# not publicly maintained, developer contact is difficult,
+# and project website has SSL certificate issues.
+# Bug #838109.
+# Removal on 2022-11-13
+net-misc/spread
+
+# Matt Turner <mattst88@gentoo.org> (2022-10-12)
+# Unmaintained and archived upstream. Last release in 2017.
+# Bug #597960.
+# Removal on 2022-11-12
+net-im/empathy
+
+# Sam James <sam@gentoo.org> (2022-10-12)
+# Upstream has withdrawn these releases because of a (yet unexplained)
+# "significant regression".
+# See https://mta.openssl.org/pipermail/openssl-announce/2022-October/000237.html.
+# and https://github.com/openssl/openssl/issues/19389.
+=dev-libs/openssl-1.1.1r
+=dev-libs/openssl-3.0.6
+
 # Volkmar W. Pogatzki <gentoo@pogatzki.net> (2022-10-10)
 # Unused Java library. Removal on 2022-11-10.
 dev-java/objenesis-test
-
-# Andreas Sturmlechner <asturm@gentoo.org> (2022-10-08)
-# Obsolete after Plasma 5.25 release, merged into KWin.
-# Removal on 2022-10-22.
-kde-plasma/kwayland-server
 
 # Michał Górny <mgorny@gentoo.org> (2022-10-08)
 # Repository and SRC_URI gone.  Last release in 2012 (guessing
@@ -146,6 +268,9 @@ media-plugins/gmpc-tagedit
 # Matt Turner <mattst88@gentoo.org> (2022-10-01)
 # Metapackage that has outlived its purpose. Made some sense in the immediate
 # aftermath of X.Org modularization 15 years ago.
+# Use these instead if desired:
+# - x11-base/xorg-apps
+# - x11-base/xorg-fonts
 # Removal on 2022-11-01. Bugs #755233, #872119.
 x11-base/xorg-x11
 
@@ -178,29 +303,10 @@ games-simulation/bcs-demo
 # Removal on 2022-10-26.  Bug #253517.
 games-sports/torcs
 
-# Ionen Wolkens <ionen@gentoo.org> (2022-09-25)
-# This version been causing major issues for some RTX 30xx users and
-# no real reason not to stick to 515.65.01 for now (but feel free to
-# unmask if it's been fine).
-# https://bugs.archlinux.org/task/75995
-# https://forums.developer.nvidia.com/t/bug-report-black-x11-screen-and-partial-lockup-when-upgraded-to-515-76-and-dual-rtx3060
-~x11-drivers/nvidia-drivers-515.76
-
 # Piotr Karbowski <slashbeast@gentoo.org> (2022-09-25)
 # No package in tree depends on dev-python/ssh2-python. Masked for removal.
 # Removal on 2022-10-25.
 dev-python/ssh2-python
-
-# Andreas Sturmlechner <asturm@gentoo.org> (2022-09-23)
-# Unmaintained upstream, obsolete after introduction of kde-misc/markdownpart.
-# Removal on 2022-10-23.
-kde-misc/kmarkdownwebview
-
-# Andreas Sturmlechner <asturm@gentoo.org> (2022-09-23)
-# Broken after Google stopped accepting "Less Secure Apps".
-# https://github.com/Intika-KDE-Plasmoids/plasmoid-ultimate-gmail-feed/issues/32
-# Use kde-misc/gmail-feed instead; removal on 2022-10-23.
-kde-misc/ultimate-gmail-feed
 
 # John Helmert III <ajak@gentoo.org> (2022-09-18)
 # Unfixed root privilege escalation, bug #631552
@@ -226,58 +332,11 @@ dev-libs/satyr
 # Removal: 2022-10-18.
 media-sound/pulseaudio-modules-bt
 
-# Joonas Niilola <juippis@gentoo.org> (2022-09-16)
-# This theme has been incorporated to enlightenment-0.25, and with
-# 0.24 removed from Gentoo's git tree, this ebuild is useless. Removal
-# in 30 days. #870355
-x11-themes/e-flat-theme
-
-# Joonas Niilola <juippis@gentoo.org> (2022-09-15)
-# Upstream split this font into separate packages: media-fonts/
-# source-code-pro, source-sans, source-serif. The current non-split
-# version is broken. Removal in 30 days. #865103
-media-fonts/source-pro
-
 # Mike Gilbert <floppym@gentoo.org> (2022-09-12)
 # repoman is no longer maintained and has been removed from the portage
 # git repository. Please use dev-util/pkgcheck and dev-util/pkgdev instead.
 # Removal on 2022-11-11. Bug #835013.
 app-portage/repoman
-
-# Michał Górny <mgorny@gentoo.org> (2022-09-11)
-# Bad quality package with failing tests.  No revdeps.
-# Removal on 2022-10-11.  Bug #869650.
-dev-python/pytest-pylint
-
-# Arthur Zamarin <arthurzam@gentoo.org> (2022-09-10)
-# Python 3.8 only. EAPI=6 ebuild. 5 open bugs. Issues with newer
-# dependencies versions.
-# Removal: 2022-10-10.  Bugs #869524, #684334.
-net-analyzer/flent
-
-# Arthur Zamarin <arthurzam@gentoo.org> (2022-09-10)
-# Python 3.8 only package. Tests are disabled. Newer targets fail
-# more tests then 3.8 target.
-# Removal: 2022-10-10.  Bug #869521.
-net-nds/nsscache
-
-# Arthur Zamarin <arthurzam@gentoo.org> (2022-09-10)
-# Python 3.8 only package, with inactive since 2017 upstream.
-# Tests fail and doesn't work on newer python targets.
-# Removal: 2022-10-10.  Bug #869512.
-dev-python/python-etcd
-
-# Arthur Zamarin <arthurzam@gentoo.org> (2022-09-10)
-# Python 3.8 only package, with capped old dependencies, and open
-# bugs and issues.
-# Removal: 2022-10-10.  Bugs #869506, #695090, #792219, #809272.
-net-misc/electrum-ltc
-
-# Arthur Zamarin <arthurzam@gentoo.org> (2022-09-10)
-# Upstream repository archived. Python 3.8 only, with issues for
-# newer targets. No reverse dependencies in tree.
-# Removal: 2022-10-10.  Bugs #869503, #747997, #832242.
-dev-python/SaltTesting
 
 # Matthias Schwarzott <zzam@gentoo.org> (2022-09-08)
 # Breaks kernel builds with BTF enabled.
@@ -414,13 +473,6 @@ dev-util/patdiff:0/0.15
 sys-devel/automake:1.13
 sys-devel/automake:1.15
 
-# John Helmert III <ajak@gentoo.org> (2022-03-13)
-# Arti is not a production-ready Tor client. According to upstream, "do
-# not use this program yet if you seriously need anonymity, privacy,
-# security, or stability." Feel free to unmask if this is not a
-# necessity.
-<net-p2p/arti-1.0.0
-
 # Anton Fischl <github@fischl-online.de> (2022-02-23)
 # Version 2.5.* is not meant for production according to upstream
 =app-backup/burp-2.5*
@@ -484,13 +536,16 @@ sys-devel/automake:1.11
 # Migration to it is expected for GNOME 42, NOT to be unmasked with GNOME 41.
 >=app-arch/file-roller-43
 >=app-backup/deja-dup-43
->=app-text/libgepub-0.7.0
+>=app-crypt/seahorse-43
 >=app-misc/tracker-3.4.0-r1
 >=app-misc/tracker-miners-3.4.0-r1
+>=app-text/gtranslator-42
+>=app-text/libgepub-0.7.0
 >=dev-libs/gjs-1.74
 >=dev-libs/libgweather-4.2.0
 >=dev-python/nautilus-python-4.0
 >=dev-util/devhelp-43
+>=dev-util/gnome-builder-43
 >=gnome-base/gnome-applets-3.46
 >=gnome-base/gnome-desktop-43
 >=gnome-base/gnome-flashback-3.46
@@ -502,8 +557,10 @@ sys-devel/automake:1.11
 >=gnome-extra/evolution-ews-3.46
 >=gnome-extra/gnome-boxes-43
 >=gnome-extra/gnome-calculator-43
+>=gnome-extra/gnome-calendar-43
 >=gnome-extra/gnome-clocks-43
 >=gnome-extra/gnome-shell-extensions-43
+>=gnome-extra/gnome-shell-frippery-43
 >=gnome-extra/gnome-software-43
 >=gnome-extra/sushi-43
 >=mail-client/balsa-2.6.4
@@ -512,6 +569,7 @@ sys-devel/automake:1.11
 >=media-gfx/gnome-photos-43
 media-libs/libshumate
 >=net-irc/polari-43
+net-libs/dleyna
 >=net-libs/gnome-online-accounts-3.46
 >=net-libs/gssdp-1.6
 >=net-libs/gupnp-1.6
@@ -521,6 +579,7 @@ net-libs/rest:1.0
 net-libs/uhttpmock:1.0
 net-libs/webkit-gtk:4.1
 net-libs/webkit-gtk:5
+>=net-misc/gupnp-tools-0.12
 >=net-misc/rygel-0.42
 sci-geosciences/geocode-glib:2
 >=sci-geosciences/gnome-maps-43
