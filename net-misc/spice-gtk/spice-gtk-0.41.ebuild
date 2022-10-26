@@ -6,7 +6,7 @@ EAPI=8
 VALA_MIN_API_VERSION="0.14"
 VALA_USE_DEPEND="vapigen"
 
-PYTHON_COMPAT=( python3_{8..10} )
+PYTHON_COMPAT=( python3_{8..11} )
 
 inherit desktop meson optfeature python-any-r1 readme.gentoo-r1 vala xdg
 
@@ -19,7 +19,6 @@ if [[ ${PV} == *9999* ]] ; then
 	SPICE_PROTOCOL_VER=9999
 else
 	SRC_URI="https://www.spice-space.org/download/gtk/${P}.tar.xz"
-	SRC_URI+=" https://dev.gentoo.org/~sam/distfiles/${CATEGORY}/${PN}/${P}-meson-0.63.patch.xz"
 	KEYWORDS="~alpha amd64 ~arm arm64 ~ia64 ~ppc ~ppc64 ~sparc x86"
 
 	SPICE_PROTOCOL_VER=0.14.3
@@ -53,9 +52,9 @@ RDEPEND="
 	usbredir? (
 		sys-apps/hwdata
 		>=sys-apps/usbredir-0.4.2
+		virtual/acl
 		virtual/libusb:1
 		policykit? (
-			sys-apps/acl
 			>=sys-auth/polkit-0.110-r1
 		)
 	)
@@ -86,10 +85,6 @@ BDEPEND="
 		dev-python/pyparsing[${PYTHON_USEDEP}]
 	')
 "
-
-PATCHES=(
-	"${WORKDIR}"/${P}-meson-0.63.patch
-)
 
 python_check_deps() {
 	python_has_version "dev-python/six[${PYTHON_USEDEP}]" &&
